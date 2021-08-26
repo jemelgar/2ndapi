@@ -8,6 +8,12 @@ const moment = require("moment");
 const Movies = db.Movie;
 const Genres = db.Genre;
 const Actors = db.Actor;
+let formatDate = (date) => {
+  let day = date.slice(0, 2);
+  let month = new Date(Date.parse(date.slice(3, 6) + " 1,2021")).getMonth() + 1;
+  let year = date.slice(7, 11);
+  return String(year + "-" + "0" + month + "-" + day);
+};
 
 const moviesAPIController = {
   list: (req, res) => {
@@ -63,13 +69,14 @@ const moviesAPIController = {
       .catch((error) => console.log(error));
   },
   create: (req, res, movie) => {
-    // return console.log(movie.Awards.slice(4, 5));
     Movies.create({
-      title: movie.Title ?? req.body.title,
-      rating: movie.Ratings[0].Value.slice(0, 3) ?? req.body.rating,
-      awards: 9999 ?? req.body.awards,
-      release_date: /*movie.Released*/ "2021-01-01" ?? req.body.release_date,
-      length: movie.Runtime.slice(0, 3) ?? req.body.length,
+      title: movie.Title ? movie.Title : req.body.title,
+      rating: req.body.rating ?? 10,
+      awards: req.body.awards ?? 9999,
+      release_date: movie.Title
+        ? formatDate(movie.Released)
+        : req.body.release_date,
+      length: movie.Title ? movie.Runtime.slice(0, 3) : req.body.length,
       genre_id: req.body.genre_id ?? null,
     })
       .then((confirm) => {
@@ -93,7 +100,7 @@ const moviesAPIController = {
             data: confirm,
           };
         }
-        // res.json(respuesta);
+        res.json(respuesta);
       })
       .catch((error) => console.log(error));
   },
